@@ -6,11 +6,17 @@ function bcaw_general_tab() {
     // Default tab states
     $defaults = [
         'delivery'     => 1,
+        'payments'     => 1,
         'package'      => 1,
         'whatsapp'     => 1,
         'system'       => 1,
         'media_check'  => 1,
-        'payments'     => 1
+        'payments'     => 1,
+        'cart'         => 1,
+        'checkout'     => 1,
+        'shop'         => 1,
+        'products'     => 1,
+        'sequential'   => 1
     ];
 
     $general = get_option('bcaw_general_settings', $defaults);
@@ -18,12 +24,17 @@ function bcaw_general_tab() {
 
     // Tab definitions
     $tabs = [
-        'payments'     => ['label' => __('Payments','banglacommerce-all-in-one-woocommerce')],
         'whatsapp'     => ['label' => __('WhatsApp','banglacommerce-all-in-one-woocommerce')],
         'delivery'     => ['label' => __('Delivery','banglacommerce-all-in-one-woocommerce')],
         'package'      => ['label' => __('Package/Invoice','banglacommerce-all-in-one-woocommerce')],
         'media_check'  => ['label' => __('Image/Video Check','banglacommerce-all-in-one-woocommerce')],
         'system'       => ['label' => __('System Info','banglacommerce-all-in-one-woocommerce')],
+        'cart'         => ['label' => __('Cart','banglacommerce-all-in-one-woocommerce')],
+        'checkout'     => ['label' => __('Checkout','banglacommerce-all-in-one-woocommerce')],
+        'shop'         => ['label' => __('Shop','banglacommerce-all-in-one-woocommerce')],
+        'products'     => ['label' => __('Products','banglacommerce-all-in-one-woocommerce')],
+        'sequential'   => ['label' => __('Sequential Number','banglacommerce-all-in-one-woocommerce')],
+        'payments'   => ['label' => __('Payments','banglacommerce-all-in-one-woocommerce')],
     ];
     ?>
 
@@ -76,6 +87,7 @@ function bcaw_general_tab() {
         .bcaw-card-padding { padding: 15px; }
         .bcaw-card-title { margin-bottom: 20px; }
     </style>
+
 <?php
 }
 ?>

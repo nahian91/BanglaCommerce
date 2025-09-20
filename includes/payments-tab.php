@@ -1,110 +1,130 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-function bcaw_payments_tab() {
+// -------------------- Register Settings --------------------
+add_action('admin_init', function() {
+    register_setting('bcaw_payments_group', 'bcaw_mobile_payments', 'bcaw_sanitize_payments_settings');
+});
 
-    $allowed_gateways = ['bkash', 'nagad', 'upay', 'rocket'];
-    $gateways = WC()->payment_gateways->payment_gateways();
-
-    // Display success message if transient exists
-    if ($message = get_transient('bcaw_success_message')) {
-        echo '<div class="notice notice-success is-dismissible bcaw-notice"><p>' . esc_html($message) . '</p></div>';
-        delete_transient('bcaw_success_message');
+// -------------------- Sanitize Input --------------------
+function bcaw_sanitize_payments_settings($input){
+    $gateways = ['bkash','nagad','upay','rocket'];
+    $output = [];
+    foreach($gateways as $g){
+        $output[$g] = [
+            'enable' => !empty($input[$g]['enable']) ? 1 : 0,
+            'mobile' => isset($input[$g]['mobile']) ? sanitize_text_field($input[$g]['mobile']) : '',
+            'fee'    => isset($input[$g]['fee']) ? floatval($input[$g]['fee']) : 0
+        ];
     }
+    return $output;
+}
 
-    // Get all completed orders
-    $orders = wc_get_orders(['limit' => -1, 'status' => 'completed']);
-    $total_amount = 0;
-    foreach ($orders as $order) $total_amount += $order->get_total();
+// -------------------- Payments Settings Page Tab --------------------
+function bcaw_payments_tab() {
+    $options = get_option('bcaw_mobile_payments', []);
+    $gateways = ['bkash','nagad','upay','rocket'];
     ?>
+    <h2><?php esc_html_e('Mobile Payments Settings','banglacommerce-all-in-one-woocommerce'); ?></h2>
+    <form method="post" action="options.php">
+        <?php settings_fields('bcaw_payments_group'); ?>
 
-    <div class="bcaw-container">
-        <h2><?php esc_html_e('Payment Method Statistics', 'banglacommerce-all-in-one-woocommerce'); ?></h2>
-        <table class="wp-list-table widefat fixed striped bcaw-payment-methods-table">
-            <thead>
-                <tr>
-                    <th><?php esc_html_e('Payment Method', 'banglacommerce-all-in-one-woocommerce'); ?></th>
-                    <th><?php esc_html_e('Total Amount', 'banglacommerce-all-in-one-woocommerce'); ?></th>
-                    <th><?php esc_html_e('Status', 'banglacommerce-all-in-one-woocommerce'); ?></th>
-                    <th><?php esc_html_e('Action', 'banglacommerce-all-in-one-woocommerce'); ?></th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($gateways as $gateway):
-                if (!in_array($gateway->id, $allowed_gateways)) continue;
+        <?php foreach($gateways as $g): 
+            $data = isset($options[$g]) ? $options[$g] : ['enable'=>0,'mobile'=>'','fee'=>0]; ?>
+            <div style="border:1px solid #ccc;padding:15px;margin-bottom:15px;border-radius:8px;">
+                <h3><?php echo esc_html(ucfirst($g)); ?></h3>
+                
+                <label>
+                    <input type="hidden" name="bcaw_mobile_payments[<?php echo esc_attr($g); ?>][enable]" value="0">
+                    <input type="checkbox" name="bcaw_mobile_payments[<?php echo esc_attr($g); ?>][enable]" value="1" <?php checked($data['enable'],1); ?>>
+                    <?php esc_html_e('Enable','banglacommerce-all-in-one-woocommerce'); ?>
+                </label><br><br>
 
-                $total_gateway_amount = 0;
-                $gateway_orders = wc_get_orders([
-                    'limit' => -1,
-                    'status' => 'completed',
-                    'payment_method' => $gateway->id,
-                ]);
-                foreach ($gateway_orders as $order) $total_gateway_amount += $order->get_total();
+                <label><?php esc_html_e('Receiver Mobile Number','banglacommerce-all-in-one-woocommerce'); ?></label><br>
+                <input type="text" name="bcaw_mobile_payments[<?php echo esc_attr($g); ?>][mobile]" value="<?php echo esc_attr($data['mobile']); ?>" style="width:100%;padding:6px;"><br><br>
 
-                $status = ($gateway->enabled === 'yes') ? 'Active' : 'Inactive';
-                $status_class = ($gateway->enabled === 'yes') ? 'bcaw-status-active' : 'bcaw-status-inactive';
-                $edit_link = admin_url('admin.php?page=wc-settings&tab=checkout&section=' . $gateway->id);
-            ?>
-                <tr>
-                    <td><?php echo esc_html($gateway->get_title()); ?></td>
-                    <td><?php echo wp_kses_post(wc_price($total_gateway_amount)); ?></td>
-                    <td class="<?php echo esc_attr($status_class); ?>"><?php echo esc_html($status); ?></td>
-                    <td><a href="<?php echo esc_url($edit_link); ?>" target="_blank" class="button button-primary"><?php esc_html_e('Edit', 'banglacommerce-all-in-one-woocommerce'); ?></a></td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
+                <label><?php esc_html_e('Charge Fee (BDT)','banglacommerce-all-in-one-woocommerce'); ?></label><br>
+                <input type="number" step="0.01" name="bcaw_mobile_payments[<?php echo esc_attr($g); ?>][fee]" value="<?php echo esc_attr($data['fee']); ?>" style="width:100%;padding:6px;">
+            </div>
+        <?php endforeach; ?>
 
-        <h2><?php esc_html_e('Transaction Information', 'banglacommerce-all-in-one-woocommerce'); ?></h2>
-        <table id="bcaw-transaction-info-table" class="wp-list-table widefat fixed striped bcaw-transaction-table">
-            <thead>
-                <tr>
-                    <th><?php esc_html_e('Order ID', 'banglacommerce-all-in-one-woocommerce'); ?></th>
-                    <th><?php esc_html_e('Payment Method', 'banglacommerce-all-in-one-woocommerce'); ?></th>
-                    <th><?php esc_html_e('Transaction ID', 'banglacommerce-all-in-one-woocommerce'); ?></th>
-                    <th><?php esc_html_e('Phone Number', 'banglacommerce-all-in-one-woocommerce'); ?></th>
-                    <th><?php esc_html_e('Amount', 'banglacommerce-all-in-one-woocommerce'); ?></th>
-                    <th><?php esc_html_e('Date', 'banglacommerce-all-in-one-woocommerce'); ?></th>
-                    <th><?php esc_html_e('Order Status', 'banglacommerce-all-in-one-woocommerce'); ?></th>
-                    <th><?php esc_html_e('Action', 'banglacommerce-all-in-one-woocommerce'); ?></th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($orders as $order):
-                $method = $order->get_payment_method();
-                $transaction_id = get_post_meta($order->get_id(), "_{$method}_transaction_id", true) ?: 'N/A';
-                $phone = get_post_meta($order->get_id(), "_{$method}_phone", true) ?: 'N/A';
-            ?>
-                <tr>
-                    <td><?php echo esc_html($order->get_id()); ?></td>
-                    <td><?php echo esc_html(ucwords($method)); ?></td>
-                    <td><?php echo esc_html($transaction_id); ?></td>
-                    <td><?php echo esc_html($phone); ?></td>
-                    <td><?php echo wp_kses_post(wc_price($order->get_total())); ?></td>
-                    <td><?php echo esc_html($order->get_date_created()->date('d F Y')); ?></td>
-                    <td><?php echo esc_html(wc_get_order_status_name($order->get_status())); ?></td>
-                    <td><a href="<?php echo esc_url($order->get_edit_order_url()); ?>" class="button button-primary"><?php esc_html_e('Edit Order', 'banglacommerce-all-in-one-woocommerce'); ?></a></td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
+        <?php submit_button(__('Save Settings','banglacommerce-all-in-one-woocommerce')); ?>
+    </form>
+    <?php
+}
 
-        <h3><?php esc_html_e('Total Amount: ', 'banglacommerce-all-in-one-woocommerce'); echo wp_kses_post(wc_price($total_amount)); ?></h3>
-    </div>
+// -------------------- Checkout Fields --------------------
+add_action('woocommerce_after_order_notes', function($checkout){
+    $options = get_option('bcaw_mobile_payments', []);
+    $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
-    <!-- Initialize DataTables -->
-    <script type="text/javascript">
-    jQuery(document).ready(function($){
-        $('#bcaw-transaction-info-table').DataTable({
-            "order": [[0, "desc"]],
-            "pageLength": 10,
-            "lengthMenu": [5, 10, 25, 50, 100],
-            "columnDefs": [
-                { "orderable": false, "targets": -1 } // Disable ordering on Action column
-            ]
-        });
+    foreach($options as $key => $data){
+        if($data['enable'] && isset($available_gateways[$key])){
+            woocommerce_form_field($key.'_txn', [
+                'type' => 'text',
+                'class' => ['form-row-wide','bcaw-mobile-field'],
+                'label' => ucfirst($key).' Transaction Number',
+                'placeholder' => 'Enter transaction number',
+                'required' => true,
+            ]);
+        }
+    }
+});
+
+// -------------------- JS Toggle Field --------------------
+add_action('wp_footer', function(){
+    if(!is_checkout()) return;
+    ?>
+    <script>
+    jQuery(function($){
+        function toggleMobileFields(){
+            var selected = $('input[name="payment_method"]:checked').val();
+            $('.bcaw-mobile-field').closest('p.form-row').hide();
+            if(selected) $('#'+selected+'_txn_field').closest('p.form-row').show();
+        }
+        toggleMobileFields();
+        $('form.checkout').on('change', 'input[name="payment_method"]', toggleMobileFields);
     });
     </script>
+    <?php
+});
 
-<?php
-}
+// -------------------- Save Transaction Number --------------------
+add_action('woocommerce_checkout_update_order_meta', function($order_id){
+    $options = get_option('bcaw_mobile_payments', []);
+    foreach($options as $key => $data){
+        if(isset($_POST[$key.'_txn']) && !empty($_POST[$key.'_txn'])){
+            update_post_meta($order_id, $key.'_txn', sanitize_text_field($_POST[$key.'_txn']));
+        }
+    }
+});
+
+// -------------------- Add Fee to Cart --------------------
+add_action('woocommerce_cart_calculate_fees', function($cart){
+    if(is_admin() && !defined('DOING_AJAX')) return;
+    $options = get_option('bcaw_mobile_payments', []);
+    if(isset($_POST['payment_method'])){
+        $method = sanitize_text_field($_POST['payment_method']);
+        if(!empty($options[$method]['enable']) && floatval($options[$method]['fee'])>0){
+            $cart->add_fee(ucfirst($method).' Payment Fee', floatval($options[$method]['fee']));
+        }
+    }
+});
+
+// -------------------- Show Transaction Number in Admin --------------------
+add_action('woocommerce_admin_order_data_after_billing_address', function($order){
+    $options = get_option('bcaw_mobile_payments', []);
+    foreach($options as $key=>$data){
+        $txn = get_post_meta($order->get_id(), $key.'_txn', true);
+        if($txn) echo '<p><strong>'.ucfirst($key).' Transaction:</strong> '.esc_html($txn).'</p>';
+    }
+});
+
+// -------------------- Show Transaction Number in Emails --------------------
+add_filter('woocommerce_email_order_meta_keys', function($keys){
+    $keys[] = 'bkash_txn';
+    $keys[] = 'nagad_txn';
+    $keys[] = 'upay_txn';
+    $keys[] = 'rocket_txn';
+    return $keys;
+});
