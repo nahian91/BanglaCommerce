@@ -1,0 +1,44 @@
+.bes-product-card {
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:20px;
+    max-width:700px;
+    background:#f9f9f9;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+.bes-product-card h2 {margin-top:0; margin-bottom:10px;}
+.bes-product-card p {margin-bottom:15px; color:#555;}
+.bes-product-field {
+    margin-bottom:12px;
+    display:flex;
+    align-items:center;
+}
+.switch {
+    position: relative;
+    display: inline-block;
+    width:50px;
+    height:24px;
+    margin-right:10px;
+}
+.switch input {display:none;}
+.slider {
+    position:absolute;
+    cursor:pointer;
+    top:0; left:0; right:0; bottom:0;
+    background:#ccc;
+    transition:.4s;
+    border-radius:34px;
+}
+.slider:before {
+    position:absolute;
+    content:"";
+    height:18px;
+    width:18px;
+    left:3px;
+    bottom:3px;
+    background:white;
+    transition:.4s;
+    border-radius:50%;
+}
+input:checked + .slider {background:#4caf50;}
+input:checked + .slider:before {transform:translateX(26px);}

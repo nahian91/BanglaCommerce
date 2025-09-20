@@ -1,0 +1,15 @@
+.bes-whatsapp-wrap {
+  text-align: center;
+  margin-top: 25px;
+}
+.bes-whatsapp-wrap a.bes-whatsapp-btn {
+  text-decoration: none;
+  font-size: 20px;
+  display: inline-block;
+  padding: 10px 30px;
+  border-radius: 9px;
+  color: #fff;
+}
+.single-product .bes-whatsapp-wrap{
+    text-align: left;
+}

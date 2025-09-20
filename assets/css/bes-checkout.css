@@ -1,0 +1,16 @@
+.bes-section { border:1px solid #ddd; padding:15px; margin-bottom:15px; border-radius:5px; background:#fafafa; }
+.bes-card-header { background:#f1f1f1; padding:10px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
+.bes-card-body { display:none; padding:10px; }
+.bes-fields-group { list-style:none; margin:0; padding:0; }
+.bes-fields-group li { margin:5px 0; padding:8px; background:#fff; display:flex; flex-wrap:wrap; align-items:center; gap:5px; cursor:move; border:1px solid #eee; border-radius:4px; }
+.bes-fields-group li input[type=text]{ min-width:120px; padding:4px; }
+.bes-title-field label { display:block; margin-bottom:8px; }
+.bes-preview { border:1px dashed #ccc; padding:10px; margin-top:10px; background:#fff; }
+
+/* Switch Styles */
+.switch { position: relative; display: inline-block; width:40px; height:20px; }
+.switch input { display:none; }
+.slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; transition:.4s; border-radius:20px; }
+.slider:before { position:absolute; content:""; height:16px; width:16px; left:2px; bottom:2px; background:white; transition:.4s; border-radius:50%; }
+input:checked + .slider { background:#4caf50; }
+input:checked + .slider:before { transform:translateX(20px); }
