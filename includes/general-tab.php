@@ -9,14 +9,13 @@ function bcaw_general_tab() {
         'payments'     => 1,
         'package'      => 1,
         'whatsapp'     => 1,
-        'system'       => 1,
-        'media_check'  => 1,
-        'payments'     => 1,
         'cart'         => 1,
         'checkout'     => 1,
         'shop'         => 1,
         'products'     => 1,
-        'sequential'   => 1
+        'sequential'   => 1,
+        'media_check'  => 1,
+        'system'       => 1,
     ];
 
     $general = get_option('bcaw_general_settings', $defaults);
@@ -34,7 +33,6 @@ function bcaw_general_tab() {
         'shop'         => ['label' => __('Shop','banglacommerce-all-in-one-woocommerce')],
         'products'     => ['label' => __('Products','banglacommerce-all-in-one-woocommerce')],
         'sequential'   => ['label' => __('Sequential Number','banglacommerce-all-in-one-woocommerce')],
-        'payments'   => ['label' => __('Payments','banglacommerce-all-in-one-woocommerce')],
     ];
     ?>
 

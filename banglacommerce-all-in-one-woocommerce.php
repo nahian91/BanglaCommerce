@@ -35,7 +35,6 @@ add_action('admin_init', function() {
     register_setting('bcaw_shop_group', 'bcaw_shop_settings');
     register_setting('bcaw_products_group', 'bcaw_products_settings');
     register_setting('bcaw_sequential_group', 'bcaw_sequential_settings');
-    register_setting('bcaw_payments_group', 'bcaw_payments_settings');
 });
 
 // -------------------- Activation Hook --------------------
@@ -106,7 +105,6 @@ function bcaw_settings_page(){
     'shop'        => __('Shop', 'banglacommerce-all-in-one-woocommerce'), // Shop page layout & controls
     'products'    => __('Product', 'banglacommerce-all-in-one-woocommerce'), // Individual product controls
     'sequential'  => __('Sequential Numbers', 'banglacommerce-all-in-one-woocommerce'), // Configure WooCommerce sequential order numbers
-    'payments'    => __('Payments', 'banglacommerce-all-in-one-woocommerce'), // bKash, Nagad, Upay, Rocket settings
 ];
 
     ?>
@@ -180,11 +178,6 @@ function bcaw_settings_page(){
                     settings_fields('bcaw_sequential_group');
                     bcaw_sequential_tab();
                 break;
-
-                case 'payments':
-                    settings_fields('bcaw_payments_group');
-                    bcaw_payments_tab();
-                break;
             }
             ?>
         </form>
@@ -208,7 +201,6 @@ add_action('admin_notices', function(){
             'shop'=>__('Shop settings saved successfully!', 'banglacommerce-all-in-one-woocommerce'),
             'products'=>__('Products settings saved successfully!', 'banglacommerce-all-in-one-woocommerce'),
             'sequential'=>__('Sequential Order Numbers settings saved successfully!', 'banglacommerce-all-in-one-woocommerce'),
-            'payments'=>__('Payments settings saved successfully!', 'banglacommerce-all-in-one-woocommerce'),
         ];
         if(isset($messages[$tab])){
             echo '<div class="notice notice-success is-dismissible"><p>'.esc_html($messages[$tab]).'</p></div>';

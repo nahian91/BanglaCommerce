@@ -84,15 +84,18 @@ function bcaw_checkout_tab(){
 add_filter('woocommerce_checkout_fields', function($fields){
     $settings = get_option('bcaw_checkout_settings', []);
     if(empty($settings)) return $fields;
+
     $new_fields = [];
-    foreach($settings as $key=>$f){
-        $new_fields[$key] = [
-            'label'       => $f['label'],
-            'placeholder' => $f['placeholder'],
-            'required'    => !empty($f['required']),
-            'class'       => ['form-row-wide'],
-            'clear'       => true,
-        ];
+    foreach($settings as $key => $f){
+        if(!empty($f['required'])){ // Only include enabled fields
+            $new_fields[$key] = [
+                'label'       => $f['label'],
+                'placeholder' => $f['placeholder'],
+                'required'    => true,
+                'class'       => ['form-row-wide'],
+                'clear'       => true,
+            ];
+        }
     }
     $fields['billing'] = $new_fields;
     return $fields;
